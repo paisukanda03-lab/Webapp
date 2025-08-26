@@ -1,0 +1,548 @@
+html = r"""<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>เกมเคมีอินทรีย์: Organic Hero</title>
+<style>
+  :root{
+    --bg:#0f1220;
+    --panel:#161a2f;
+    --accent:#6de3ff;
+    --accent2:#ffd166;
+    --ok:#7ae582;
+    --bad:#ff6b6b;
+    --text:#e9f1ff;
+    --muted:#a9b6cc;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #1d2250 0%, var(--bg) 60%);
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .app{
+    width:min(940px,100%);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent 180px), var(--panel);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    overflow:hidden;
+  }
+  header{
+    display:flex; gap:16px; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.06);
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));
+  }
+  header h1{font-size:20px; margin:0; letter-spacing:.3px}
+  .brand{display:flex; align-items:center; gap:12px}
+  .brand .logo{
+    width:36px; height:36px; border-radius:10px;
+    background: conic-gradient(from 0deg, var(--accent), #9dffb4, var(--accent2), var(--accent));
+    box-shadow: inset 0 0 30px rgba(255,255,255,.4);
+    position:relative;
+  }
+  .brand .logo:after{
+    content:"C";
+    position:absolute; inset:0; display:grid; place-items:center;
+    color:#0b1020; font-weight:900;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+  }
+  header .meta{display:flex; gap:10px; align-items:center; font-size:14px; color:var(--muted)}
+  .pill{border:1px solid rgba(255,255,255,.12); padding:6px 10px; border-radius:30px; background:rgba(255,255,255,.03)}
+  .view{display:none; padding:20px}
+  .view.active{display:block}
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px;
+  }
+  .card{
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+    border-radius:16px; padding:16px; transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.18)}
+  .title{font-weight:700; font-size:18px; margin-bottom:6px}
+  .muted{color:var(--muted); font-size:14px}
+  button{
+    background:linear-gradient(180deg, var(--accent), #57b7ff);
+    color:#052038; font-weight:700; border:none; border-radius:12px;
+    padding:12px 14px; cursor:pointer; box-shadow: 0 8px 20px rgba(109,227,255,.25);
+  }
+  button.secondary{background:rgba(255,255,255,.06); color:var(--text); border:1px solid rgba(255,255,255,.12); box-shadow:none}
+  button.ghost{background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,.12)}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap}
+  .questionBox{
+    background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.08);
+    border-radius:16px; padding:14px 16px; margin-bottom:14px;
+  }
+  .question{font-size:18px; line-height:1.5}
+  .choices{display:grid; gap:10px; margin-top:12px}
+  .choice{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+    border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.03);
+    cursor:pointer;
+  }
+  .choice.correct{border-color: rgba(122,229,130,.8); box-shadow:0 0 0 3px rgba(122,229,130,.2) inset}
+  .choice.wrong{border-color: rgba(255,107,107,.8); box-shadow:0 0 0 3px rgba(255,107,107,.15) inset}
+  .explain{margin-top:10px; color:var(--muted)}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .scoreboard{display:flex; gap:8px; align-items:center}
+  .badge{padding:6px 10px; border-radius:12px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); font-size:14px}
+  .svgwrap{display:grid; place-items:center; padding:8px; background:rgba(255,255,255,.02); border-radius:12px; border:1px solid rgba(255,255,255,.08); margin-top:12px}
+  .center{text-align:center}
+  .big{font-size:42px; font-weight:900; letter-spacing:.5px}
+  .progress{height:10px; background:rgba(255,255,255,.08); border-radius:999px; overflow:hidden; margin:10px 0}
+  .progress>div{height:100%; width:0; background:linear-gradient(90deg, #9dffb4, var(--accent));}
+  .split{display:grid; grid-template-columns: 1.4fr .9fr; gap:16px}
+  @media (max-width: 800px){ .split{grid-template-columns: 1fr} }
+  .small{font-size:12px; color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1>Organic Hero — เกมฝึกเคมีอินทรีย์</h1>
+    </div>
+    <div class="meta">
+      <span class="pill">ว30225 เคมีเพิ่มเติม 5</span>
+      <span class="pill">ระบบ IUPAC • หมู่ฟังก์ชัน • สมบัติ</span>
+    </div>
+  </header>
+
+  <div class="view active" id="home">
+    <div class="grid">
+      <div class="card">
+        <div class="title">โหมด 1 — หมู่ฟังก์ชัน</div>
+        <div class="muted">ดูโครงสร้างอย่างง่ายแล้วระบุหมู่ฟังก์ชันให้ถูกต้อง</div>
+        <div class="row" style="margin-top:8px">
+          <button onclick="startGame('functional')">เริ่มเล่น</button>
+          <button class="secondary" onclick="previewCards()">แฟลชการ์ด</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">โหมด 2 — การเรียกชื่อ IUPAC</div>
+        <div class="muted">เลือกชื่อตามระบบ IUPAC สำหรับโครงสร้างที่กำหนด</div>
+        <div class="row" style="margin-top:8px">
+          <button onclick="startGame('iupac')">เริ่มเล่น</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">โหมด 3 — สมบัติ & ปฏิกิริยา</div>
+        <div class="muted">ตอบคำถามเกี่ยวกับสมบัติ จุดเดือด กรด-เบส และปฏิกิริยาพื้นฐาน</div>
+        <div class="row" style="margin-top:8px">
+          <button onclick="startGame('properties')">เริ่มเล่น</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="title">โหมดท้าทาย 60 วิ</div>
+        <div class="muted">สุ่มทุกหัวข้อ เก็บคะแนนแข่งกับเวลา</div>
+        <div class="row" style="margin-top:8px">
+          <button onclick="startGame('challenge')">เริ่ม!</button>
+          <span class="small">สถิติสูงสุด: <b id="best">0</b> คะแนน</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="play">
+    <div class="split">
+      <div>
+        <div class="toolbar">
+          <button class="secondary" onclick="goHome()">← กลับหน้าแรก</button>
+          <span class="badge" id="modeName">โหมด</span>
+          <div class="scoreboard">
+            <span class="badge">ข้อที่ <b id="qnum">1</b>/<span id="qtotal">10</span></span>
+            <span class="badge">คะแนน: <b id="score">0</b></span>
+            <span class="badge" id="timerWrap" style="display:none">เวลา: <b id="time">60</b>s</span>
+          </div>
+        </div>
+        <div class="progress"><div id="bar"></div></div>
+        <div class="questionBox">
+          <div class="question" id="question">—</div>
+          <div class="svgwrap" id="canvas" aria-label="ภาพประกอบโครงสร้างอินทรีย์"></div>
+          <div class="choices" id="choices"></div>
+          <div class="explain" id="explain"></div>
+        </div>
+        <div class="row">
+          <button class="secondary" onclick="next()">ข้อต่อไป ⏭</button>
+          <button class="ghost" onclick="toggleHint()">ใบ้คำ ✦</button>
+          <span class="small" id="hint" style="display:none"></span>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="title">โน้ตเร็ว</div>
+          <div class="muted">
+            • จุดเดือด: กรดคาร์บอกซิลิก > แอลกอฮอล์ > แอลดีไฮด์/คีโตน > อีเธอร์/อัลเคน<br>
+            • กรด-เบส: กรดคาร์บอกซิลิกเป็นกรด, เอมีนเป็นเบสอ่อน<br>
+            • ปฏิกิริยาเด่น: แอลเคน—การแทนที่, แอลคีน—การเติม, เอสเตอร์—ไฮโดรไลซิส
+          </div>
+        </div>
+        <div class="card">
+          <div class="title">ตารางหมู่ฟังก์ชันย่อ</div>
+          <div class="muted" id="tableMini"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="result">
+    <div class="center" style="padding:40px 20px">
+      <div class="big" id="finalScore">0</div>
+      <div style="margin-top:6px">คะแนนรวม</div>
+      <div class="muted" id="finalMsg" style="margin-top:10px"></div>
+      <div class="row center" style="justify-content:center; margin-top:16px">
+        <button onclick="replay()">เล่นอีกครั้ง</button>
+        <button class="secondary" onclick="goHome()">กลับหน้าแรก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- ข้อมูลคำถาม ----------
+
+// วาด SVG โครงสร้างอย่างง่าย (สัญลักษณ์และเส้น)
+const Draw = {
+  // เส้นโซ่คาร์บอน n อะตอม
+  chain(n=4){ 
+    const step = 44, y=40;
+    let x = 20; let lines = [], labels=[];
+    for(let i=0;i<n-1;i++){
+      const x2 = x+step;
+      lines.push(`<line x1="${x}" y1="${y}" x2="${x2}" y2="${y}" stroke="currentColor" stroke-width="3" />`);
+      x=x2;
+    }
+    x=20;
+    for(let i=0;i<n;i++){
+      labels.push(`<text x="${x}" y="${y-8}" font-size="12">C</text>`);
+      x+=step;
+    }
+    return `<svg viewBox="0 0 ${step*(n-1)+40} 80" width="100%" height="80" aria-hidden="true">${lines.join("")}${labels.join("")}</svg>`;
+  },
+  alkene(){ return `<svg viewBox="0 0 180 80" width="100%" height="80"><line x1="20" y1="40" x2="80" y2="40" stroke="currentColor" stroke-width="3"/><line x1="20" y1="35" x2="80" y2="35" stroke="currentColor" stroke-width="3"/><line x1="80" y1="40" x2="160" y2="40" stroke="currentColor" stroke-width="3"/><text x="15" y="28" font-size="12">C</text><text x="80" y="28" font-size="12">C</text></svg>`; },
+  alkyne(){ return `<svg viewBox="0 0 180 80" width="100%" height="80"><line x1="20" y1="40" x2="80" y2="40" stroke="currentColor" stroke-width="5"/><line x1="20" y1="35" x2="80" y2="35" stroke="currentColor" stroke-width="3" opacity=".7"/><line x1="20" y1="45" x2="80" y2="45" stroke="currentColor" stroke-width="3" opacity=".7"/><line x1="80" y1="40" x2="160" y2="40" stroke="currentColor" stroke-width="3"/></svg>`; },
+  alcohol(){ return `<svg viewBox="0 0 200 90" width="100%" height="90"><line x1="20" y1="45" x2="120" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="150" cy="45" r="12" fill="none" stroke="currentColor" stroke-width="3"/><text x="146" y="49" font-size="12">O</text><text x="18" y="32" font-size="12">R</text></svg>`; },
+  aldehyde(){ return `<svg viewBox="0 0 220 90" width="100%" height="90"><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><line x1="100" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="3"/><line x1="140" y1="45" x2="140" y2="25" stroke="currentColor" stroke-width="3"/><text x="12" y="32" font-size="12">R-</text><text x="136" y="20" font-size="12">O</text><text x="140" y="60" font-size="12">H</text><line x1="100" y1="40" x2="140" y2="40" stroke="currentColor" stroke-width="3"/></svg>`; },
+  ketone(){ return `<svg viewBox="0 0 220 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><line x1="100" y1="40" x2="140" y2="40" stroke="currentColor" stroke-width="3"/><line x1="100" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="3"/><text x="142" y="48" font-size="12">-R'</text><line x1="120" y1="45" x2="120" y2="25" stroke="currentColor" stroke-width="3"/><text x="116" y="20" font-size="12">O</text></svg>`; },
+  carboxylic(){ return `<svg viewBox="0 0 220 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><line x1="100" y1="40" x2="140" y2="40" stroke="currentColor" stroke-width="3"/><line x1="100" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="3"/><line x1="140" y1="45" x2="140" y2="25" stroke="currentColor" stroke-width="3"/><text x="136" y="20" font-size="12">O</text><line x1="140" y1="45" x2="170" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="190" cy="45" r="10" stroke="currentColor" stroke-width="3" fill="none"/><text x="186" y="49" font-size="12">O</text><text x="196" y="49" font-size="12">H</text></svg>`; },
+  ester(){ return `<svg viewBox="0 0 240 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><line x1="100" y1="40" x2="140" y2="40" stroke="currentColor" stroke-width="3"/><line x1="100" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="3"/><line x1="140" y1="45" x2="170" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="190" cy="45" r="10" stroke="currentColor" stroke-width="3" fill="none"/><text x="186" y="49" font-size="12">O</text><text x="196" y="32" font-size="12">R'</text></svg>`; },
+  ether(){ return `<svg viewBox="0 0 220 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="120" cy="45" r="10" stroke="currentColor" stroke-width="3" fill="none"/><text x="117" y="49" font-size="12">O</text><line x1="130" y1="45" x2="200" y2="45" stroke="currentColor" stroke-width="3"/><text x="202" y="32" font-size="12">-R'</text></svg>`; },
+  amine(){ return `<svg viewBox="0 0 220 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="120" cy="45" r="10" stroke="currentColor" stroke-width="3" fill="none"/><text x="116" y="49" font-size="12">N</text><text x="130" y="32" font-size="12">H₂ / R'</text></svg>`; },
+  amide(){ return `<svg viewBox="0 0 240 90" width="100%" height="90"><text x="12" y="32" font-size="12">R-</text><line x1="20" y1="45" x2="100" y2="45" stroke="currentColor" stroke-width="3"/><line x1="100" y1="40" x2="140" y2="40" stroke="currentColor" stroke-width="3"/><line x1="100" y1="45" x2="140" y2="45" stroke="currentColor" stroke-width="3"/><line x1="140" y1="45" x2="160" y2="45" stroke="currentColor" stroke-width="3"/><circle cx="180" cy="45" r="10" stroke="currentColor" stroke-width="3" fill="none"/><text x="176" y="49" font-size="12">N</text><text x="193" y="32" font-size="12">H₂ / R'</text></svg>`; },
+  benzene(){ return `<svg viewBox="0 0 120 90" width="100%" height="90">
+    <polygon points="60,15 95,35 95,75 60,95 25,75 25,35" fill="none" stroke="currentColor" stroke-width="3"/>
+    <circle cx="60" cy="55" r="18" fill="none" stroke="currentColor" stroke-width="3"/>
+  </svg>`; },
+};
+
+const functionalCards = [
+  { name:"แอลกอฮอล์ (Alcohol)", key:"alcohol", hint:"ลงท้ายชื่อด้วย -ol, หมู่ -OH", svg:Draw.alcohol(), fact:"มีหมู่ไฮดรอกซิล (-OH) ละลายน้ำดีเมื่อคาร์บอนสั้น" },
+  { name:"อัลดีไฮด์ (Aldehyde)", key:"aldehyde", hint:"-al, มีหมู่ -CHO", svg:Draw.aldehyde(), fact:"เกิดจากการออกซิไดซ์ปานกลางของแอลกอฮอล์ปฐมภูมิ" },
+  { name:"คีโตน (Ketone)", key:"ketone", hint:"-one, มีหมู่ C=O กลางสาย", svg:Draw.ketone(), fact:"เกิดจากการออกซิไดซ์แอลกอฮอล์ทุติยภูมิ" },
+  { name:"กรดคาร์บอกซิลิก (Carboxylic acid)", key:"carboxylic", hint:"-oic acid, หมู่ -COOH", svg:Draw.carboxylic(), fact:"จุดเดือดสูง เพราะพันธะไฮโดรเจนแรง" },
+  { name:"เอสเตอร์ (Ester)", key:"ester", hint:"ชื่อส่วนแอลคิล + -oate", svg:Draw.ester(), fact:"ให้กลิ่นหอม ผลไม้ หลายชนิดคือเอสเตอร์" },
+  { name:"อีเธอร์ (Ether)", key:"ether", hint:"R-O-R', ใช้เป็นตัวทำละลาย", svg:Draw.ether(), fact:"ไม่เกิดพันธะ H กับตัวเอง จึงเดือดต่ำกว่าแอลกอฮอล์" },
+  { name:"เอมีน (Amine)", key:"amine", hint:"มี N เป็นเบสอ่อน", svg:Draw.amine(), fact:"รับโปรตอนเกิดแอมโมเนียม (RNH₃⁺)" },
+  { name:"เอไมด์ (Amide)", key:"amide", hint:"คาร์บอนิลติดกับ N", svg:Draw.amide(), fact:"พันธะ H แข็งแรง จุดเดือดสูง" },
+  { name:"อัลคีน (Alkene)", key:"alkene", hint:"พันธะคู่ C=C", svg:Draw.alkene(), fact:"ให้ปฏิกิริยาเติม (addition)" },
+  { name:"อัลไคน์ (Alkyne)", key:"alkyne", hint:"พันธะสาม C≡C", svg:Draw.alkyne(), fact:"เทอร์มินอลอัลไคน์เป็นกรดอ่อน" },
+  { name:"อะโรมาติก (Benzene)", key:"benzene", hint:"วงหกเหลี่ยม มีความเสถียรพิเศษ", svg:Draw.benzene(), fact:"ผ่านปฏิกิริยาแทนที่ (SEAr)" },
+  { name:"อัลเคน (Alkane)", key:"alkane", hint:"C–C เดี่ยว, อิ่มตัว", svg:Draw.chain(5), fact:"ปฏิกิริยาแทนที่กับแสง (ฮาโลเจเนชัน)" },
+];
+
+// ตารางย่อ
+function renderMiniTable(){
+  const el = document.getElementById('tableMini');
+  el.innerHTML = functionalCards.map(c=>`• <b>${c.name.split(" ")[0]}</b> — ${c.hint}`).join("<br>");
+}
+
+// ชุดคำถาม IUPAC และสมบัติ
+const iupacQuestions = [
+  {
+    q:"เลือกชื่อ IUPAC ที่ถูกต้องของ CH₃–CH₂–CH₃",
+    svg: Draw.chain(3),
+    choices:["โพรเพน (propane)","โพรพีน (propene)","โพรพาไลน์ (propyne)","เมเทน (methane)"],
+    answer:0,
+    explain:"สายตรง 3 คาร์บอน อิ่มตัว ⇒ โพรเพน",
+    hint:"อัลเคน 3C → propane"
+  },
+  {
+    q:"ชื่อ IUPAC ของ CH₃–CH₂–OH คือ",
+    svg: Draw.alcohol(),
+    choices:["เมทานอล","เอทานอล","โพรพานอล","ไอโซโพรพานอล"],
+    answer:1,
+    explain:"มี 2 คาร์บอน + หมู่ -OH ⇒ เอทานอล",
+    hint:"2C = eth-, แอลกอฮอล์ลงท้าย -ol"
+  },
+  {
+    q:"โครงสร้างที่มี C=O กลางสาย เรียกว่า",
+    svg: Draw.ketone(),
+    choices:["อัลดีไฮด์","คีโตน","เอไมด์","เอสเตอร์"],
+    answer:1,
+    explain:"คาร์บอนิลกลางสายคือคีโตน ส่วนปลายสายติด H คืออัลดีไฮด์",
+    hint:"กลางสาย = คีโตน"
+  },
+  {
+    q:"กรด CH₃–COOH มีชื่อว่า",
+    svg: Draw.carboxylic(),
+    choices:["กรดเมทาโนอิก","กรดเอทาโนอิก","กรดโพรพาโนอิก","กรดบิวทาโนอิก"],
+    answer:1,
+    explain:"มี 2 คาร์บอน ⇒ เอทาโนอิก (acetic acid)",
+    hint:"2C = eth-"
+  },
+  {
+    q:"CH₂=CH–CH₃ มีชื่อว่า",
+    svg: Draw.alkene(),
+    choices:["โพรพีน","โพรเพน","โพรไพน์","ไอโซโพรพีน"],
+    answer:0,
+    explain:"3 คาร์บอน + พันธะคู่ ⇒ โพรพีน (propene)",
+    hint:"อัลคีน 3C → propene"
+  },
+];
+
+const propQuestions = [
+  {
+    q:"ข้อใดมีจุดเดือดสูงสุด (โมเลกุลขนาดใกล้กัน)",
+    svg: Draw.alcohol(),
+    choices:["อีเธอร์","แอลกอฮอล์","อัลเคน","แอลดีไฮด์"],
+    answer:1,
+    explain:"แอลกอฮอล์เกิดพันธะไฮโดรเจนระหว่างกันได้ จุดเดือดสูง",
+    hint:"พันธะ H ทำให้เดือดสูง"
+  },
+  {
+    q:"สารประกอบใดเป็นกรดที่สุด",
+    svg: Draw.carboxylic(),
+    choices:["เอมีน","แอลกอฮอล์","กรดคาร์บอกซิลิก","อีเธอร์"],
+    answer:2,
+    explain:"กรดคาร์บอกซิลิกให้โปรตอนได้ดี (pKa ~ 4-5)",
+    hint:"มี -COOH"
+  },
+  {
+    q:"อัลคีนโดยทั่วไปให้ปฏิกิริยาใด",
+    svg: Draw.alkene(),
+    choices:["แทนที่อนุภาคอิสระ","เติม (addition)","ควบแน่น","ออกซิเดชันเท่านั้น"],
+    answer:1,
+    explain:"พันธะคู่แตกแล้วเติมหมู่เข้ามา",
+    hint:"C=C → เติม"
+  },
+  {
+    q:"เอสเตอร์เมื่อไฮโดรไลซิสในเบส ให้",
+    svg: Draw.ester(),
+    choices:["แอลกอฮอล์ + เกลือกรดคาร์บอกซิลิก","แอลดีไฮด์ + น้ำ","คีโตน + แอลกอฮอล์","เอไมด์"],
+    answer:0,
+    explain:"saponification: เอสเตอร์ + เบส → แอลกอฮอล์ + เกลือคาร์บอกซิเลต",
+    hint:"สบู่เกิดจากปฏิกิริยานี้"
+  },
+  {
+    q:"เอมีนมีสมบัติเป็น",
+    svg: Draw.amine(),
+    choices:["กรดแก่","กรดอ่อน","เบสอ่อน","ไม่มีสมบัติกรด-เบส"],
+    answer:2,
+    explain:"คู่โดดเดี่ยวบน N รับโปรตอนได้ ⇒ เบสอ่อน",
+    hint:"N มี lone pair"
+  },
+];
+
+// สุ่มช้อยส์จากหมู่ฟังก์ชันให้ผู้เล่นเลือก
+function makeFunctionalQuestion(){
+  const card = functionalCards[Math.floor(Math.random()*functionalCards.length)];
+  // สร้างตัวเลือก 4 ตัว ไม่ซ้ำ
+  const shuffled = [...functionalCards].sort(()=>Math.random()-0.5).slice(0,4);
+  if(!shuffled.some(c=>c.key===card.key)){
+    shuffled[Math.floor(Math.random()*4)] = card;
+  }
+  return {
+    q:"ภาพต่อไปนี้คือหมู่ฟังก์ชันใด?",
+    svg: card.svg,
+    choices: shuffled.map(c=>c.name.split(" ")[0]),
+    answer: shuffled.findIndex(c=>c.key===card.key),
+    explain:`${card.name} — ${card.fact}`,
+    hint: card.hint
+  };
+}
+
+// รวมทุกคำถามตามโหมด
+function getQuestionPool(mode){
+  if(mode==='functional') return Array.from({length:10}, makeFunctionalQuestion);
+  if(mode==='iupac') return [...iupacQuestions];
+  if(mode==='properties') return [...propQuestions];
+  if(mode==='challenge') return [...iupacQuestions, ...propQuestions, ...Array.from({length:5}, makeFunctionalQuestion)];
+  return [];
+}
+
+// ---------- ลอจิกเกม ----------
+let state = {
+  mode:'functional',
+  idx:0,
+  score:0,
+  questions:[],
+  timer:null,
+  timeLeft:60,
+  answered:false,
+};
+
+function $(id){ return document.getElementById(id); }
+function show(viewId){
+  for(const v of document.querySelectorAll('.view')) v.classList.remove('active');
+  $(viewId).classList.add('active');
+}
+
+function startGame(mode){
+  state.mode=mode;
+  state.idx=0;
+  state.score=0;
+  state.answered=false;
+  state.questions = getQuestionPool(mode);
+  if(mode==='challenge'){
+    state.timeLeft=60;
+    startTimer();
+    $('timerWrap').style.display='inline-flex';
+    $('qtotal').textContent = state.questions.length;
+  }else{
+    stopTimer();
+    $('timerWrap').style.display='none';
+    $('qtotal').textContent = state.questions.length;
+  }
+  $('modeName').textContent = labelMode(mode);
+  renderMiniTable();
+  show('play');
+  renderQ();
+}
+
+function labelMode(m){
+  return m==='functional'?'หมู่ฟังก์ชัน': m==='iupac'?'ชื่อ IUPAC': m==='properties'?'สมบัติ & ปฏิกิริยา': 'ท้าทาย 60 วิ';
+}
+
+function renderQ(){
+  const q = state.questions[state.idx];
+  $('question').innerHTML = q.q;
+  $('canvas').innerHTML = q.svg || "";
+  $('choices').innerHTML = "";
+  $('explain').textContent = "";
+  $('hint').style.display='none';
+  $('qnum').textContent = state.idx+1;
+  $('score').textContent = state.score;
+  const pct = Math.round((state.idx)/Math.max(1,state.questions.length)*100);
+  $('bar').style.width = pct+'%';
+  state.answered=false;
+  q.choices.forEach((c,i)=>{
+    const div = document.createElement('div');
+    div.className='choice';
+    div.innerHTML = `<div>${String.fromCharCode(65+i)}.</div><div>${c}</div>`;
+    div.onclick = ()=> select(i);
+    $('choices').appendChild(div);
+  });
+}
+
+function select(i){
+  if(state.answered) return;
+  const q = state.questions[state.idx];
+  state.answered=true;
+  const nodes = Array.from(document.querySelectorAll('.choice'));
+  nodes.forEach((n,idx)=>{
+    if(idx===q.answer){ n.classList.add('correct'); }
+    if(idx===i && idx!==q.answer){ n.classList.add('wrong'); }
+  });
+  if(i===q.answer){
+    state.score += 10;
+    $('explain').innerHTML = `✅ ถูกต้อง! ${q.explain}`;
+  }else{
+    state.score += 0;
+    $('explain').innerHTML = `❌ ยังไม่ใช่ — คำตอบที่ถูกคือ <b>${q.choices[q.answer]}</b>. ${q.explain}`;
+  }
+  $('score').textContent = state.score;
+  // อัปเดต progress bar
+  const pct = Math.round((state.idx+1)/Math.max(1,state.questions.length)*100);
+  $('bar').style.width = pct+'%';
+  // อัปเดตสถิติสูงสุดในโหมดท้าทาย
+  if(state.mode==='challenge'){
+    const best = Number(localStorage.getItem('org_hero_best')||'0');
+    if(state.score>best) localStorage.setItem('org_hero_best', String(state.score));
+    updateBest();
+  }
+}
+
+function next(){
+  if(state.idx < state.questions.length-1){
+    state.idx++;
+    renderQ();
+  }else{
+    endGame();
+  }
+}
+
+function toggleHint(){
+  const q = state.questions[state.idx];
+  $('hint').style.display = $('hint').style.display==='none' ? 'inline' : 'none';
+  $('hint').textContent = 'ใบ้: ' + (q.hint || 'ลองตัดสินจากหมู่ฟังก์ชัน');
+}
+
+function startTimer(){
+  stopTimer();
+  state.timer = setInterval(()=>{
+    state.timeLeft--;
+    $('time').textContent = state.timeLeft;
+    if(state.timeLeft<=0){
+      endGame();
+    }
+  },1000);
+}
+function stopTimer(){ if(state.timer){ clearInterval(state.timer); state.timer=null; } }
+
+function endGame(){
+  stopTimer();
+  $('finalScore').textContent = state.score;
+  const msg = state.score>=80 ? "สุดยอด! ความแม่นระดับโปร" :
+              state.score>=50 ? "ดีมาก! อีกนิดเดียว" :
+              "ไม่เป็นไร ลองใหม่ได้ ฝึกบ่อย ๆ เก่งแน่นอน";
+  $('finalMsg').textContent = `${msg} — โหมด: ${labelMode(state.mode)}`;
+  show('result');
+  updateBest();
+}
+
+function replay(){ startGame(state.mode); }
+function goHome(){ stopTimer(); show('home'); updateBest(); }
+
+function updateBest(){
+  $('best').textContent = localStorage.getItem('org_hero_best') || '0';
+}
+
+// แฟลชการ์ดอย่างง่าย
+function previewCards(){
+  const wrap = document.createElement('div');
+  wrap.className='view active';
+  wrap.style.padding='20px';
+  wrap.innerHTML = `
+    <div class="toolbar">
+      <button class="secondary" onclick="this.closest('.app').removeChild(this.closest('.view')); document.getElementById('home').classList.add('active');">← กลับ</button>
+      <span class="badge">แฟลชการ์ด: หมู่ฟังก์ชัน</span>
+    </div>
+    <div class="grid" style="margin-top:12px"></div>
+  `;
+  document.querySelector('.app').appendChild(wrap);
+  document.getElementById('home').classList.remove('active');
+  const grid = wrap.querySelector('.grid');
+  functionalCards.forEach(c=>{
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `<div class="title">${c.name}</div><div class="muted">${c.hint}</div><div class="svgwrap">${c.svg}</div><div class="small">${c.fact}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+updateBest();
+</script>
+</body>
+</html>
+"""
+
+Path("/mnt/data/organic_hero.html").write_text(html, encoding="utf-8")
+print("Saved to /mnt/data/organic_hero.html")
