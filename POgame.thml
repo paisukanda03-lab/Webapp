@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผจญภัยในโลกอะตอม: เกมถูก-ผิดเคมี</title>
+    <style>
+        /* CSS สำหรับ UI เรียบง่าย น่าสนใจ */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* สีฟ้าอ่อน เหมือนโลกวิทยาศาสตร์ */
+            text-align: center;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #007bff; /* สีน้ำเงินสดใส */
+            font-size: 2em;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #question {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #28a745; /* เขียวสำหรับถูก */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #false-btn {
+            background-color: #dc3545; /* แดงสำหรับผิด */
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #feedback {
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        #score {
+            font-size: 1em;
+            color: #ffc107; /* สีเหลืองสำหรับคะแนน */
+        }
+        .emoji {
+            font-size: 2em; /* Emoji ใหญ่เพื่อความน่าสนใจ */
+        }
+        #restart-btn {
+            display: none;
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>ผจญภัยในโลกอะตอม 🧑‍🔬⚛️</h1>
+        <p>สวัสดีนักเคมีรุ่นเยาว์! มาช่วยอะตอมเชื่อมพันธะให้ถูกต้องกันเถอะ 😊<br>ตอบถูกได้ดาว ⭐ และเรียนรู้เรื่องพันธะเคมีเพื่อเป็นนักวิทยาศาสตร์ในอนาคต!</p>
+        <div id="question"></div>
+        <button id="true-btn">ถูก</button>
+        <button id="false-btn">ผิด</button>
+        <div id="feedback" class="emoji"></div>
+        <div id="score">คะแนน: 0</div>
+        <button id="restart-btn">เล่นใหม่</button>
+    </div>
+
+    <script>
+        // JavaScript สำหรับกลไกเกม
+
+        // ชุดคำถาม (array ของ object: question, answer เป็น true/false, explanation)
+        const questions = [
+            { question: "พันธะไอออนิกเกิดระหว่างโลหะและอโลหะ จริงหรือเท็จ?", answer: true, explanation: "ถูกต้อง! เพราะโลหะเสียอิเล็กตรอนให้อโลหะ" },
+            { question: "พันธะโคเวเลนต์เกิดจากการแบ่งปันอิเล็กตรอน จริงหรือเท็จ?", answer: true, explanation: "ถูกต้อง! เช่น ในโมเลกุลน้ำ H2O" },
+            { question: "พันธะโลหะเกิดในสารประกอบอย่างน้ำ จริงหรือเท็จ?", answer: false, explanation: "ผิด! พันธะโลหะเกิดในโลหะ เช่น ทองแดง" },
+            { question: "โครงสร้างโมเลกุลของ CO2 เป็นเส้นตรง จริงหรือเท็จ?", answer: true, explanation: "ถูกต้อง! เพราะคาร์บอนเชื่อมกับออกซิเจนสองตัวแบบโคเวเลนต์คู่" },
+            { question: "อะตอมไฮโดรเจนมีพันธะไอออนิกกับตัวเอง จริงหรือเท็จ?", answer: false, explanation: "ผิด! มันเป็นพันธะโคเวเลนต์ใน H2" },
+            { question: "NaCl มีพันธะไอออนิก จริงหรือเท็จ?", answer: true, explanation: "ถูกต้อง! โซเดียม (โลหะ) + คลอรีน (อโลหะ)" },
+            { question: "พันธะโคเวเลนต์สามารถเกิดระหว่างโลหะสองตัว จริงหรือเท็จ?", answer: false, explanation: "ผิด! มักเกิดระหว่างอโลหะ" },
+            { question: "โครงสร้างของเพชรเป็นแบบ tetrahedral จริงหรือเท็จ?", answer: true, explanation: "ถูกต้อง! คาร์บอนแต่ละตัวเชื่อมกับสี่ตัวอื่น" },
+            { question: "พันธะไฮโดรเจนเป็นพันธะหลักใน DNA จริงหรือเท็จ?", answer: false, explanation: "ผิด! มันเป็นพันธะรอง แต่สำคัญในการจับคู่เบส" },
+            { question: "O2 มีพันธะโคเวเลนต์เดี่ยว จริงหรือเท็จ?", answer: false, explanation: "ผิด! เป็นพันธะคู่" }
+        ];
+
+        // ตัวแปรสำหรับเกม
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let remainingQuestions = [...questions]; // คัดลอก array เพื่อสุ่มไม่ซ้ำ
+
+        // ฟังก์ชันแสดงคำถามสุ่ม
+        function showQuestion() {
+            if (remainingQuestions.length === 0) {
+                endGame();
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * remainingQuestions.length);
+            const question = remainingQuestions[randomIndex];
+            document.getElementById('question').textContent = question.question;
+            currentQuestionIndex = randomIndex; // เก็บ index สำหรับลบหลังตอบ
+        }
+
+        // ฟังก์ชันตรวจคำตอบ
+        function checkAnswer(isTrue) {
+            const question = remainingQuestions[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            if (question.answer === isTrue) {
+                score++;
+                feedback.textContent = 'ถูกต้อง! ⭐ ' + question.explanation + ' 😊';
+                document.getElementById('score').textContent = 'คะแนน: ' + score;
+            } else {
+                feedback.textContent = 'ผิดจ้า! 😔 ' + question.explanation;
+            }
+            // ลบคำถามที่ตอบแล้วเพื่อไม่ซ้ำ
+            remainingQuestions.splice(currentQuestionIndex, 1);
+            // แสดงคำถามถัดไปหลัง 2 วินาที
+            setTimeout(() => {
+                feedback.textContent = '';
+                showQuestion();
+            }, 2000);
+        }
+
+        // ฟังก์ชันจบเกม
+        function endGame() {
+            document.getElementById('question').textContent = 'จบเกม啦! คุณได้ ' + score + ' คะแนนจาก 10';
+            document.getElementById('true-btn').style.display = 'none';
+            document.getElementById('false-btn').style.display = 'none';
+            document.getElementById('restart-btn').style.display = 'block';
+            document.getElementById('feedback').textContent = score >= 7 ? 'เก่งมาก! คุณพร้อมเป็นนักเคมีแล้ว 🏆' : 'ลองใหม่นะ! ฝึกอีกหน่อยก็เก่งขึ้น 😊';
+        }
+
+        // ฟังก์ชันรีสตาร์ท
+        function restartGame() {
+            remainingQuestions = [...questions];
+            score = 0;
+            document.getElementById('score').textContent = 'คะแนน: 0';
+            document.getElementById('true-btn').style.display = 'inline';
+            document.getElementById('false-btn').style.display = 'inline';
+            document.getElementById('restart-btn').style.display = 'none';
+            showQuestion();
+        }
+
+        // Event listeners
+        document.getElementById('true-btn').addEventListener('click', () => checkAnswer(true));
+        document.getElementById('false-btn').addEventListener('click', () => checkAnswer(false));
+        document.getElementById('restart-btn').addEventListener('click', restartGame);
+
+        // เริ่มเกม
+        showQuestion();
+    </script>
+</body>
+</html>
