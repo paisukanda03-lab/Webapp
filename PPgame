@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผจญภัยในโลกอะตอม: เกมถูก-ผิดเคมี</title>
+    <style>
+        /* CSS สำหรับ UI เรียบง่าย น่าสนใจ */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* สีฟ้าอ่อน เหมือนโลกวิทยาศาสตร์ */
+            text-align: center;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #007bff; /* สีน้ำเงินสดใส */
+            font-size: 2em;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #question {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #28a745; /* เขียวสำหรับถูก */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #false-btn {
+            background-color: #dc3545; /* แดงสำหรับผิด */
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #feedback {
+            font-size: 1.1em;
+            margin: 10px 0
