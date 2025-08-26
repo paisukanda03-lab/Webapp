@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผจญภัยในโลกเคมี</title>
+    <style>
+        /* CSS สำหรับ UI: เรียบง่าย น่าสนใจ สีสดใสเหมาะเด็ก */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* สีฟ้าอ่อน */
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 2px solid #4caf50; /* เขียวสด */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #scene {
+            font-size: 3em; /* emoji ใหญ่ */
+            margin: 20px 0;
+        }
+        #question {
+            font-size: 1.2em;
+            margin: 20px 0;
+            display: none; /* ซ่อนตอนแรก */
+        }
+        button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #score {
+            font-size: 1.5em;
+            color: #ff5722; /* ส้มสด */
+        }
+        #end-message {
+            font-size: 1.2em;
+            color: #2196f3; /* น้ำเงิน */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>ผจญภัยในโลกเคมี 🧪</h1>
+        <p>คุณคือนักผจญภัยเคมี! เดินสำรวจห้องทดลอง คลิกที่สิ่งของเพื่อตอบคำถามถูก/ผิด สะสมคะแนนเพื่อค้นพบสูตรลับ และเรียนรู้พันธะเคมีที่ช่วยในอาชีพนักเคมี เช่น สร้างยาใหม่!</p>
+        <div id="scene">⚛️ 🔗 🧫</div> <!-- ฉากเริ่มต้นด้วย emoji -->
+        <button id="left">เดินซ้าย</button>
+        <button id="right">เดินขวา</button>
+        <button id="interact">คลิกโต้ตอบ!</button>
+        <div id="question">
+            <p id="question-text"></p>
+            <button id="true">ถูก</button>
+            <button id="false">ผิด</button>
+        </div>
+        <p id="score">คะแนน: 0</p>
+        <div id="end-message"></div>
+    </div>
+
+    <script>
+        // JavaScript สำหรับ logic เกม
+        // คำอธิบาย: ส่วนนี้จัดการสถานะเกม, คำถาม, การคลิก, และคะแนน
+
+        // ข้อมูลเกม: ด่าน (scenes) และคำถาม true/false (เนื้อหาเคมีพื้นฐาน)
+        const scenes = [
+            { name: 'ห้องอะตอม', emoji: '⚛️ ⚛️ ⚛️', description: 'อะตอมรอจับมือกัน!' },
+            { name: 'ห้องพันธะ', emoji: '🔗 🧲 🔬', description: 'พันธะกำลังเกิด!' },
+            { name: 'ห้องโครงสร้าง', emoji: '🧬 💧 🌬️', description: 'โครงสร้างโมเลกุล!' }
+        ];
+        let currentScene = 0; // ด่านปัจจุบัน
+        const questions = [
+            { text: 'พันธะไอออนิกเกิดระหว่างโลหะกับอโลหะ?', answer: true },
+            { text: 'พันธะโควาเลนต์เกิดจากการแบ่งปันอิเล็กตรอน?', answer: true },
+            { text: 'น้ำ (H2O) มีพันธะไอออนิก?', answer: false },
+            { text: 'คาร์บอนไดออกไซด์ (CO2) มีโครงสร้างเชิงเส้น?', answer: true },
+            { text: 'อะตอมไฮโดรเจนมีอิเล็กตรอนชั้นนอก 2 ตัว?', answer: false },
+            { text: 'พันธะโลหะเกิดในโลหะบริสุทธิ์?', answer: true },
+            { text: 'NaCl มีพันธะโควาเลนต์?', answer: false },
+            { text: 'โครงสร้าง Lewis แสดงพันธะและคู่อิเล็กตรอน?', answer: true }
+        ];
+        let score = 0; // คะแนนเริ่มต้น
+        let questionActive = false; // สถานะคำถาม
+
+        // อัปเดตฉาก
+        function updateScene() {
+            document.getElementById('scene').innerHTML = scenes[currentScene].emoji;
+            document.getElementById('scene').title = scenes[currentScene].description; // tooltip สำหรับคำอธิบาย
+        }
+
+        // เปิดคำถามสุ่ม
+        function showQuestion() {
+            if (questionActive) return; // ป้องกันซ้ำ
+            questionActive = true;
+            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById('question-text').innerText = randomQ.text;
+            document.getElementById('question').style.display = 'block';
+            // จัดการคำตอบ
+            document.getElementById('true').onclick = () => checkAnswer(true, randomQ.answer);
+            document.getElementById('false').onclick = () => checkAnswer(false, randomQ.answer);
+        }
+
+        // ตรวจคำตอบ
+        function checkAnswer(userAnswer, correctAnswer) {
+            questionActive = false;
+            document.getElementById('question').style.display = 'none';
+            if (userAnswer === correctAnswer) {
+                score += 10;
+                alert('ถูกต้อง! คุณเก่งมาก 🏆');
+            } else {
+                alert('ผิดจ้า ลองใหม่นะ! 😊');
+            }
+            document.getElementById('score').innerText = `คะแนน: ${score}`;
+            checkWin();
+        }
+
+        // ตรวจชนะ
+        function checkWin() {
+            if (score >= 50) {
+                document.getElementById('end-message').innerText = 'ยินดีด้วย! คุณค้นพบสูตรลับเคมี 🧪 การรู้พันธะช่วยในอาชีพนักเคมี เช่น สร้างยารักษาโรค';
+                document.getElementById('end-message').style.display = 'block';
+                // ปิดปุ่มเพื่อจบเกม
+                document.getElementById('left').disabled = true;
+                document.getElementById('right').disabled = true;
+                document.getElementById('interact').disabled = true;
+            }
+        }
+
+        // Event listeners สำหรับปุ่มเดิน
+        document.getElementById('left').onclick = () => {
+            currentScene = (currentScene - 1 + scenes.length) % scenes.length;
+            updateScene();
+        };
+        document.getElementById('right').onclick = () => {
+            currentScene = (currentScene + 1) % scenes.length;
+            updateScene();
+        };
+        document.getElementById('interact').onclick = showQuestion;
+
+        // เริ่มเกม
+        updateScene();
+    </script>
+</body>
+</html>
