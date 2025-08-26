@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chem Escape: ภารกิจหนียักษ์พันธะ</title>
+<style>
+  body{
+    margin:0;
+    font-family:"Segoe UI",sans-serif;
+    background:#0f172a;
+    color:#f1f5f9;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  h1{margin:.5em 0; color:#38bdf8}
+  #game{
+    width:90%; max-width:600px; margin:auto; padding:1em;
+    background:#1e293b; border-radius:12px;
+  }
+  #scene{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:3rem; margin:1em 0;
+  }
+  #question{background:#334155; padding:1em; border-radius:8px; margin-bottom:1em}
+  input,button{
+    font-size:1rem; padding:.5em; border-radius:6px; border:none;
+  }
+  input{width:60%}
+  button{cursor:pointer; background:#38bdf8; color:#0f172a; font-weight:bold}
+  #result{margin-top:.5em}
+  #score{margin:.5em 0; color:#facc15; font-weight:bold}
+  .ok{color:#22c55e}
+  .wrong{color:#ef4444}
+</style>
+</head>
+<body>
+  <h1>🏃‍♂️ Chem Escape: ภารกิจหนียักษ์พันธะ</h1>
+  <div id="game">
+    <div id="scene">
+      <div id="giant">👹</div>
+      <div id="player">🧑‍🔬</div>
+    </div>
+    <div id="question"></div>
+    <input id="answer" placeholder="พิมพ์คำตอบ...">
+    <button onclick="checkAnswer()">ตรวจคำตอบ</button>
+    <div id="result"></div>
+    <div id="score">⭐ คะแนน: 0</div>
+  </div>
+
+<script>
+const questions = [
+  {q:"Na และ Cl จะเกิดพันธะอะไร?", ans:["ionic","ไอออนิก"]},
+  {q:"H และ O (ใน H2O) เป็นพันธะชนิดใด?", ans:["covalent","โคเวเลนต์","โควาเลนต์"]},
+  {q:"Fe กับ Cu มักเป็นพันธะชนิดใด?", ans:["metallic","โลหะ","เมทัลลิก"]},
+  {q:"C มีเวเลนซ์กี่ตัว?", ans:["4","๔"]},
+  {q:"N ต้องการพันธะกี่เส้นตามกฎ HONC?", ans:["3","๓"]},
+  {q:"Ca2+ กับ Cl- ได้สูตรอะไร?", ans:["cacl2","CaCl2"]},
+];
+let idx=0, score=0, playerPos=0, giantPos=5;
+
+function showQ(){
+  if(idx>=questions.length){
+    document.getElementById("question").innerHTML="🎉 คุณหนีออกจากถ้ำสำเร็จ! ได้เหรียญ 🏅";
+    document.getElementById("answer").style.display="none";
+    return;
+  }
+  document.getElementById("question").innerHTML=questions[idx].q;
+  document.getElementById("answer").value="";
+  updateScene();
+}
+
+function checkAnswer(){
+  const val=document.getElementById("answer").value.trim().toLowerCase();
+  const ans=questions[idx].ans.map(a=>a.toLowerCase());
+  const result=document.getElementById("result");
+  if(ans.includes(val)){
+    score+=10;
+    playerPos++;
+    result.innerHTML="<span class='ok'>ถูกต้อง! คุณวิ่งหนีไปข้างหน้า 🏃‍♂️</span>";
+    idx++;
+  }else{
+    giantPos--;
+    result.innerHTML="<span class='wrong'>ผิด! ยักษ์เข้าใกล้ 👹</span>";
+  }
+  document.getElementById("score").textContent="⭐ คะแนน: "+score;
+  if(giantPos<=playerPos){
+    document.getElementById("question").innerHTML="😱 ยักษ์จับคุณได้! ลองใหม่อีกครั้ง";
+    document.getElementById("answer").style.display="none";
+    return;
+  }
+  showQ();
+}
+
+function updateScene(){
+  document.getElementById("scene").innerHTML="👹".repeat(giantPos-playerPos)+"🧑‍🔬";
+}
+
+showQ();
+</script>
+</body>
+</html>
