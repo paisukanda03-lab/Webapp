@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Chemistry Battle</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background: linear-gradient(to right, #e0f7fa, #fce4ec);
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #4a148c;
+    }
+    #battle-area {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+    }
+    .character {
+      width: 200px;
+      border: 2px solid #6a1b9a;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+    }
+    .emoji {
+      font-size: 60px;
+    }
+    .hp {
+      font-weight: bold;
+      margin: 10px;
+    }
+    #question {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .choice {
+      display: block;
+      margin: 5px auto;
+      padding: 10px;
+      width: 200px;
+      border-radius: 5px;
+      border: none;
+      background: #8e24aa;
+      color: white;
+      cursor: pointer;
+    }
+    .choice:hover {
+      background: #ab47bc;
+    }
+    #log {
+      margin-top: 20px;
+      min-height: 60px;
+      font-size: 16px;
+      color: #004d40;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚔️ Chemistry Battle 🧪</h1>
+  <p>ตอบคำถามเคมีเพื่อโจมตีศัตรู!</p>
+
+  <div id="battle-area">
+    <div class="character">
+      <div class="emoji">🔵🧪</div>
+      <div class="hp" id="player-hp">HP: 100</div>
+    </div>
+    <div class="character">
+      <div class="emoji">👾 CO₂</div>
+      <div class="hp" id="enemy-hp">HP: 100</div>
+    </div>
+  </div>
+
+  <div id="question">คำถามจะอยู่ตรงนี้</div>
+  <div id="choices"></div>
+
+  <div id="log"></div>
+
+  <script>
+    // ค่าเริ่มต้น
+    let playerHP = 100;
+    let enemyHP = 100;
+
+    // คลังคำถาม
+    const questions = [
+      {
+        q: "พันธะในโมเลกุล H₂O เป็นแบบใด?",
+        choices: ["Ionic bond", "Covalent bond", "Metallic bond"],
+        correct: "Covalent bond"
+      },
+      {
+        q: "ธาตุใดต้องใช้ 2 อะตอม H เพื่อสร้าง H₂?",
+        choices: ["Hydrogen", "Oxygen", "Carbon"],
+        correct: "Hydrogen"
+      },
+      {
+        q: "โมเลกุล CO₂ มีอะตอมคาร์บอนกี่ตัว?",
+        choices: ["1", "2", "3"],
+        correct: "1"
+      }
+    ];
+
+    // แสดงคำถาม
+    function showQuestion() {
+      if (enemyHP <= 0 || playerHP <= 0) return;
+
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      document.getElementById("question").textContent = q.q;
+
+      const choicesDiv = document.getElementById("choices");
+      choicesDiv.innerHTML = "";
+
+      q.choices.forEach(c => {
+        const btn = document.createElement("button");
+        btn.textContent = c;
+        btn.className = "choice";
+        btn.onclick = () => checkAnswer(c, q.correct);
+        choicesDiv.appendChild(btn);
+      });
+    }
+
+    // ตรวจคำตอบ
+    function checkAnswer(choice, correct) {
+      if (choice === correct) {
+        enemyHP -= 30;
+        document.getElementById("log").textContent = "✅ ตอบถูก! คุณโจมตีศัตรู -30 HP";
+      } else {
+        playerHP -= 20;
+        document.getElementById("log").textContent = "❌ ตอบผิด! ศัตรูโจมตีคุณ -20 HP";
+      }
+      updateHP();
+      if (enemyHP > 0 && playerHP > 0) {
+        setTimeout(showQuestion, 1000);
+      } else {
+        endGame();
+      }
+    }
+
+    // อัปเดต HP
+    function updateHP() {
+      document.getElementById("player-hp").textContent = "HP: " + playerHP;
+      document.getElementById("enemy-hp").textContent = "HP: " + enemyHP;
+    }
+
+    // จบเกม
+    function endGame() {
+      const log = document.getElementById("log");
+      if (enemyHP <= 0) {
+        log.textContent = "🎉 คุณชนะ! ศัตรูถูกกำจัดแล้ว";
+      } else {
+        log.textContent = "💀 คุณแพ้! ลองใหม่อีกครั้ง";
+      }
+      document.getElementById("choices").innerHTML = "";
+    }
+
+    // เริ่มเกม
+    showQuestion();
+  </script>
+</body>
+</html>
