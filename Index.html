@@ -1,237 +1,430 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organic Quest: Rise to Victory</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f4f8;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        #instructions, #game, #end-screen {
-            background: white;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .option {
-            background: #3498db;
-            color: white;
-            padding: 10px;
-            margin: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            display: inline-block;
-        }
-        .option:hover {
-            background: #2980b9;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-weight: bold;
-        }
-        #resources {
-            margin-top: 20px;
-            color: #8e44ad;
-        }
-        button {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #219653;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ผจญภัยในโลกของสารอินทรีย์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #80deea);
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: #00695c;
+      font-size: 2.8em;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+    .instructions {
+      margin: 20px;
+      font-size: 1.2em;
+      color: #004d40;
+      background: rgba(255,255,255,0.9);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      max-width: 600px;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .molecules, .target {
+      border: 3px dashed #00796b;
+      padding: 20px;
+      margin: 10px;
+      min-width: 240px;
+      min-height: 240px;
+      background: #b2dfdb;
+      border-radius: 15px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .molecules:hover, .target:hover {
+      background: #80cbc4;
+      transform: scale(1.02);
+    }
+    .molecule {
+      font-size: 2em;
+      margin: 10px;
+      padding: 10px;
+      cursor: grab;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      user-select: none;
+      touch-action: none;
+    }
+    .molecule:hover {
+      transform: scale(1.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .molecule:active { cursor: grabbing; }
+    .molecule.success {
+      animation: spin 1s ease-in-out;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+    .score, .level, .attempts, .timer, .high-score {
+      font-size: 1.3em;
+      color: #004d40;
+      background: rgba(255,255,255,0.9);
+      padding: 10px 15px;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      margin: 5px;
+    }
+    button:hover {
+      background: #004d40;
+      transform: scale(1.05);
+    }
+    .popup {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      background: #ffffff;
+      border: 3px solid #00796b;
+      border-radius: 15px;
+      padding: 20px 40px;
+      font-size: 1.5em;
+      color: #004d40;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -30%); }
+      to { opacity: 1; transform: translate(-50%, -20%); }
+    }
+    .winner {
+      font-size: 3.5em;
+      animation: bounce 1s infinite alternate;
+    }
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-15px); }
+    }
+    .mode-toggle {
+      margin: 10px;
+      font-size: 1em;
+    }
+  </style>
 </head>
 <body>
-    <h1>Organic Quest: Rise to Victory</h1>
-    
-    <div id="instructions">
-        <h2>วิธีเล่น</h2>
-        <p>ยินดีต้อนรับสู่ Organic Quest! คุณจะสวมบทเป็นนักเคมีรุ่นใหม่ที่ต้องเรียนรู้เกี่ยวกับสารอินทรีย์เพื่อผ่าน 5 ด่านและค้นพบ "สารแห่งชัยชนะ"</p>
-        <ul>
-            <li><b>เป้าหมาย</b>: ตอบคำถามเกี่ยวกับสารอินทรีย์ (จับคู่สูตร, คุณสมบัติ, หรือปฏิกิริยา)</li>
-            <li><b>ด่าน</b>: มี 5 ด่าน (อัลเคน, อัลคีน, อัลไคน์, สารอะโรมาติก, การสังเคราะห์)</li>
-            <li><b>คะแนน</b>: ตอบถูกได้ 10 คะแนน, ผิดเสีย 5 คะแนน</li>
-            <li><b>เงื่อนไข</b>: ต้องตอบถูกอย่างน้อย 2 ข้อต่อด่านเพื่อไปด่านต่อไป (ด่าน 5 ต้องตอบถูกทั้ง 3 ข้อ)</li>
-            <li><b>รางวัล</b>: สะสม "พลังงาน" จากแต่ละด่านเพื่อใช้ในด่านสุดท้าย</li>
-        </ul>
-        <button onclick="startGame()">เริ่มเกม</button>
-    </div>
 
-    <div id="game" style="display: none;">
-        <h2 id="level-title"></h2>
-        <p id="question"></p>
-        <div id="options"></div>
-        <p id="feedback"></p>
-        <p>คะแนน: <span id="score">0</span></p>
-        <p id="resources">ทรัพยากร: คาร์บอน: 0, พันธะคู่: 0, พันธะสาม: 0, วงแหวน: 0</p>
-    </div>
+<h1>🧪 ผจญภัยในโลกของสารอินทรีย์</h1>
+<div class="instructions">
+  <p>ลากหรือแตะโมเลกุลไปวางในกล่องเป้าหมายเพื่อสร้างสารประกอบตามโจทย์!</p>
+  <p>โหมดปกติ: มี 3 โอกาสต่อระดับ และจำกัดเวลา</p>
+  <p>โหมดฝึกหัด: ไม่จำกัดเวลาและโอกาส</p>
+  <p>เป้าหมายปัจจุบัน: <span id="targetCompound">เอทานอล (CH3CH2OH)</span></p>
+</div>
 
-    <div id="end-screen" style="display: none;">
-        <h2 id="end-title"></h2>
-        <p id="end-message"></p>
-        <button onclick="location.reload()">เล่นใหม่</button>
-    </div>
+<div class="mode-toggle">
+  <button onclick="toggleMode()">สลับเป็นโหมดฝึกหัด</button>
+</div>
 
-    <script>
-        const levels = [
-            {
-                title: "ด่าน 1: พื้นฐานแห่งอัลเคน",
-                resource: "คาร์บอน",
-                questions: [
-                    { question: "สูตร: CH₄", answer: "มีเทน", options: ["มีเทน", "อีเทน", "โพรเพน"] },
-                    { question: "สูตร: C₂H₆", answer: "อีเทน", options: ["มีเทน", "อีเทน", "บิวเทน"] },
-                    { question: "สูตรทั่วไปของอัลเคนคือ?", answer: "CₙH₂ₙ₊₂", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
-                ]
-            },
-            {
-                title: "ด่าน 2: อัลคีนและความท้าทายแห่งพันธะคู่",
-                resource: "พันธะคู่",
-                questions: [
-                    { question: "สูตร: C₂H₄", answer: "เอทิลีน", options: ["เอทิลีน", "อะเซทิลีน", "โพรพิลีน"] },
-                    { question: "ผลผลิตเมื่อ C₃H₆ + H₂ → ?", answer: "C₃H₈", options: ["C₃H₄", "C₃H₆", "C₃H₈"] },
-                    { question: "สูตรทั่วไปของอัลคีนคือ?", answer: "CₙH₂ₙ", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
-                ]
-            },
-            {
-                title: "ด่าน 3: อัลไคน์และพลังแห่งพันธะสาม",
-                resource: "พันธะสาม",
-                questions: [
-                    { question: "สูตร: C₂H₂", answer: "อะเซทิลีน", options: ["เอทิลีน", "อะเซทิลีน", "โพรเพน"] },
-                    { question: "อัลไคน์ใช้ในงานอะไร?", answer: "การเชื่อม", options: ["การเชื่อม", "ทำพลาสติก", "ทำยา"] },
-                    { question: "สูตรทั่วไปของอัลไคน์คือ?", answer: "CₙH₂ₙ₋₂", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
-                ]
-            },
-            {
-                title: "ด่าน 4: สารอะโรมาติกและวงแหวนแห่งพลัง",
-                resource: "วงแหวน",
-                questions: [
-                    { question: "สารใดเป็นสารอะโรมาติก?", answer: "เบนซีน", options: ["มีเทน", "เบนซีน", "เอทิลีน"] },
-                    { question: "สูตรของเบนซีนคือ?", answer: "C₆H₆", options: ["C₆H₆", "C₆H₁₂", "C₆H₁₄"] },
-                    { question: "คุณสมบัติพิเศษของสารอะโรมาติก?", answer: "ความเสถียรจาก delocalized electrons", options: ["มีพันธะเดี่ยว", "ความเสถียรจาก delocalized electrons", "ละลายน้ำได้ดี"] }
-                ]
-            },
-            {
-                title: "ด่าน 5: สังเคราะห์สารแห่งชัยชนะ",
-                resource: "ชัยชนะ",
-                questions: [
-                    { question: "ปฏิกิริยาใดเปลี่ยนเบนซีนเป็นฟีนอล?", answer: "การแทนที่ด้วย -OH", options: ["การเติม H₂", "การแทนที่ด้วย -OH", "การควบแน่น"] },
-                    { question: "สารใดเป็นผลผลิตเมื่อ C₆H₆ + Cl₂ → ?", answer: "C₆H₅Cl", options: ["C₆H₅Cl", "C₆H₄Cl₂", "C₆H₆Cl"] },
-                    { question: "ต้องใช้ทรัพยากรใดในการสร้างฟีนอล?", answer: "วงแหวน + OH", options: ["คาร์บอน + พันธะคู่", "วงแหวน + OH", "พันธะสาม"] }
-                ]
-            }
-        ];
+<div class="container">
+  <div class="molecules" id="molecules"></div>
+  <div class="target" id="target">
+    <p>ปล่อยโมเลกุลที่นี่เพื่อสร้างสาร!</p>
+  </div>
+</div>
 
-        let currentLevel = 0;
-        let currentQuestion = 0;
-        let score = 0;
-        let correctAnswers = 0;
-        let resources = { คาร์บอน: 0, พันธะคู่: 0, พันธะสาม: 0, วงแหวน: 0 };
+<div class="stats">
+  <div class="score">คะแนน: <span id="score">0</span></div>
+  <div class="level">ระดับ: <span id="level">1</span></div>
+  <div class="attempts">โอกาส: <span id="attempts">3</span></div>
+  <div class="timer">เวลา: <span id="time">30</span> วินาที</div>
+  <div class="high-score">คะแนนสูงสุด: <span id="highScore">0</span></div>
+</div>
 
-        function startGame() {
-            document.getElementById("instructions").style.display = "none";
-            document.getElementById("game").style.display = "block";
-            loadLevel();
+<div>
+  <button onclick="resetTarget()">รีเซ็ต</button>
+  <button onclick="restartGame()">เริ่มเกมใหม่</button>
+</div>
+
+<div class="popup" id="popup"></div>
+
+<script>
+// ตัวแปรหลักของเกม
+let score = 0, level = 1, attempts = 3, timeLeft = 30, isPracticeMode = false;
+let timerInterval, highScore = localStorage.getItem('highScore') || 0;
+
+const target = document.getElementById('target');
+const moleculesDiv = document.getElementById('molecules');
+const popup = document.getElementById('popup');
+
+// ข้อมูลระดับ
+const levels = [
+  { compound: 'เอทานอล (CH3CH2OH)', molecules: ['ch3', 'ch2', 'oh'], score: 10, time: 30 },
+  { compound: 'กรดแอซิติก (CH3COOH)', molecules: ['ch3', 'cooh'], score: 15, time: 25 },
+  { compound: 'มีเทน (CH4)', molecules: ['ch3', 'h'], score: 5, time: 20 },
+  { compound: 'โพรพานอล (C3H7OH)', molecules: ['ch3', 'ch2', 'ch2', 'oh'], score: 20, time: 35 },
+  { compound: 'เบนซีน (C6H6)', molecules: ['c6h6'], score: 25, time: 40 },
+  { compound: 'เอทิลามีน (C2H5NH2)', molecules: ['ch3', 'ch2', 'nh2'], score: 18, time: 30 },
+  { compound: 'อะซิโตน (C3H6O)', molecules: ['ch3', 'co', 'ch3'], score: 22, time: 35 },
+  { compound: 'เมทานอล (CH3OH)', molecules: ['ch3', 'oh'], score: 8, time: 20 },
+  { compound: 'ฟอร์มัลดีไฮด์ (HCHO)', molecules: ['ch2o'], score: 12, time: 25 },
+  { compound: 'กลีเซอรอล (C3H8O3)', molecules: ['ch2oh', 'choh', 'ch2oh'], score: 30, time: 45 }
+];
+
+// ข้อมูลโมเลกุล
+const allMolecules = [
+  { id: 'ch3', icon: '🧬 CH₃' },
+  { id: 'ch2', icon: '🧬 CH₂' },
+  { id: 'oh', icon: '💧 OH' },
+  { id: 'cooh', icon: '🔥 COOH' },
+  { id: 'h', icon: '⚡ H' },
+  { id: 'nh2', icon: '🧪 NH₂' },
+  { id: 'c6h6', icon: '⭕ C₆H₆' },
+  { id: 'co', icon: '🌟 CO' },
+  { id: 'ch2o', icon: '🧪 CH₂O' },
+  { id: 'ch2oh', icon: '💧 CH₂OH' },
+  { id: 'choh', icon: '💧 CHOH' }
+];
+
+// อัปเดต UI
+function updateUI() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('level').textContent = level;
+  document.getElementById('attempts').textContent = isPracticeMode ? '∞' : attempts;
+  document.getElementById('targetCompound').textContent = levels[level-1].compound;
+  document.getElementById('time').textContent = isPracticeMode ? '∞' : timeLeft;
+  document.getElementById('highScore').textContent = highScore;
+  document.querySelector('.mode-toggle button').textContent = isPracticeMode ? 'สลับเป็นโหมดปกติ' : 'สลับเป็นโหมดฝึกหัด';
+}
+
+// แสดงป๊อปอัป
+function showPopup(msg) {
+  popup.innerHTML = msg;
+  popup.style.display = 'block';
+  setTimeout(() => popup.style.display = 'none', 2500);
+}
+
+// สร้างโมเลกุลในกล่องด้านซ้าย
+function populateMolecules() {
+  moleculesDiv.innerHTML = '';
+  allMolecules.forEach(m => {
+    let div = document.createElement('div');
+    div.className = 'molecule';
+    div.dataset.type = m.id;
+    div.draggable = true;
+    div.textContent = m.icon;
+    moleculesDiv.appendChild(div);
+    div.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text', m.id);
+    });
+  });
+}
+
+// รีเซ็ตกล่องเป้าหมาย
+function resetTarget() {
+  target.innerHTML = '<p>ปล่อยโมเลกุลที่นี่เพื่อสร้างสาร!</p>';
+  clearInterval(timerInterval);
+  timeLeft = levels[level-1].time;
+  if (!isPracticeMode) startTimer();
+  updateUI();
+}
+
+// เริ่มตัวจับเวลา
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!isPracticeMode) {
+        attempts--;
+        if (attempts <= 0) {
+          endGame(false);
+        } else {
+          showPopup(`😢 หมดเวลา! เหลือ ${attempts} ครั้ง`);
+          resetTarget();
         }
+      }
+    }
+  }, 1000);
+}
 
-        function loadLevel() {
-            if (currentLevel >= levels.length) {
-                endGame(true);
-                return;
-            }
-            currentQuestion = 0;
-            correctAnswers = 0;
-            document.getElementById("level-title").innerText = levels[currentLevel].title;
-            loadQuestion();
-            updateResources();
-        }
+// ตรวจสอบสารประกอบ
+function checkCompound() {
+  const moleculesInTarget = Array.from(target.children)
+    .filter(el => el.classList.contains('molecule'))
+    .map(el => el.dataset.type);
+  const curr = levels[level-1];
+  if (moleculesInTarget.length === 0) return;
+  const sortedTarget = moleculesInTarget.sort();
+  const sortedRequired = curr.molecules.sort();
+  if (JSON.stringify(sortedTarget) === JSON.stringify(sortedRequired)) {
+    let bonus = isPracticeMode ? 0 : Math.floor(timeLeft / 5) * 2;
+    score += curr.score + bonus;
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('highScore', highScore);
+    }
+    target.querySelectorAll('.molecule').forEach(m => m.classList.add('success'));
+    showPopup(`🎉 ถูกต้อง! คุณสร้าง ${curr.compound} ได้แล้ว! ${bonus ? `+${bonus} โบนัส!` : ''}`);
+    resetTarget();
+    setTimeout(nextLevel, 2500);
+  } else {
+    if (!isPracticeMode) attempts--;
+    if (!isPracticeMode && attempts <= 0) {
+      endGame(false);
+    } else {
+      showPopup(`❌ ผิด! ${isPracticeMode ? 'ลองใหม่!' : `เหลือ ${attempts} ครั้ง`}`);
+      resetTarget();
+    }
+  }
+  updateUI();
+}
 
-        function loadQuestion() {
-            const level = levels[currentLevel];
-            if (currentQuestion >= level.questions.length) {
-                if (currentLevel === levels.length - 1 && correctAnswers < 3) {
-                    endGame(false);
-                } else if (correctAnswers >= 2) {
-                    resources[level.resource]++;
-                    currentLevel++;
-                    loadLevel();
-                } else {
-                    endGame(false);
-                }
-                return;
-            }
+// ไปยังระดับถัดไป
+function nextLevel() {
+  clearInterval(timerInterval);
+  if (level < levels.length) {
+    level++;
+    attempts = 3;
+    timeLeft = levels[level-1].time;
+    resetTarget();
+    updateUI();
+    if (!isPracticeMode) startTimer();
+  } else {
+    endGame(true);
+  }
+}
 
-            const q = level.questions[currentQuestion];
-            document.getElementById("question").innerHTML = q.question;
-            const optionsDiv = document.getElementById("options");
-            optionsDiv.innerHTML = "";
-            q.options.forEach(option => {
-                const button = document.createElement("div");
-                button.className = "option";
-                button.innerText = option;
-                button.onclick = () => checkAnswer(option);
-                optionsDiv.appendChild(button);
-            });
-            document.getElementById("feedback").innerText = "";
-        }
+// จบเกม
+function endGame(win) {
+  clearInterval(timerInterval);
+  if (win) {
+    popup.innerHTML = `🎉 คุณชนะเกม! คะแนนสุดท้าย: ${score} <br><span class="winner">🏆</span>`;
+  } else {
+    popup.innerHTML = `😢 เกมจบ! คะแนน: ${score}`;
+  }
+  popup.style.display = 'block';
+  setTimeout(() => {
+    popup.style.display = 'none';
+    score = 0;
+    level = 1;
+    attempts = 3;
+    timeLeft = levels[0].time;
+    resetTarget();
+    updateUI();
+    if (!isPracticeMode) startTimer();
+  }, 3500);
+}
 
-        function checkAnswer(selected) {
-            const q = levels[currentLevel].questions[currentQuestion];
-            if (selected === q.answer) {
-                score += 10;
-                correctAnswers++;
-                document.getElementById("feedback").innerText = "ถูกต้อง! ได้ 10 คะแนน";
-                document.getElementById("feedback").style.color = "green";
-            } else {
-                score -= 5;
-                document.getElementById("feedback").innerText = `ผิด! คำตอบที่ถูกคือ ${q.answer}`;
-                document.getElementById("feedback").style.color = "red";
-            }
-            document.getElementById("score").innerText = score;
-            currentQuestion++;
-            setTimeout(loadQuestion, 1000);
-        }
+// เริ่มเกมใหม่
+function restartGame() {
+  clearInterval(timerInterval);
+  score = 0;
+  level = 1;
+  attempts = 3;
+  timeLeft = levels[0].time;
+  isPracticeMode = false;
+  resetTarget();
+  updateUI();
+  startTimer();
+}
 
-        function updateResources() {
-            document.getElementById("resources").innerText = 
-                `ทรัพยากร: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}`;
-        }
+// สลับโหมด
+function toggleMode() {
+  isPracticeMode = !isPracticeMode;
+  attempts = isPracticeMode ? Infinity : 3;
+  clearInterval(timerInterval);
+  timeLeft = levels[level-1].time;
+  resetTarget();
+  updateUI();
+  if (!isPracticeMode) startTimer();
+}
 
-        function endGame(won) {
-            document.getElementById("game").style.display = "none";
-            document.getElementById("end-screen").style.display = "block";
-            if (won) {
-                document.getElementById("end-title").innerText = "ยินดีด้วย! คุณชนะ!";
-                document.getElementById("end-message").innerHTML = `
-                    คุณได้ค้นพบ "สารแห่งชัยชนะ" และกลายเป็นนักเคมีแห่งอนาคต!<br>
-                    คะแนน: ${score}<br>
-                    ทรัพยากรที่สะสม: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}
-                `;
-            } else {
-                document.getElementById("end-title").innerText = "ลองใหม่นะ!";
-                document.getElementById("end-message").innerHTML = `
-                    คุณได้คะแนน: ${score}<br>
-                    คุณต้องตอบถูกอย่างน้อย 2 ข้อต่อด่าน (หรือ 3 ข้อในด่านสุดท้าย) เพื่อผ่าน!<br>
-                    ทรัพยากรที่สะสม: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}
-                `;
-            }
-        }
-    </script>
+// Drag & Drop สำหรับเดสก์ท็อป
+target.addEventListener('dragover', e => e.preventDefault());
+target.addEventListener('drop', e => {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('text');
+  const molData = allMolecules.find(m => m.id === type);
+  if (molData) {
+    let clone = document.createElement('div');
+    clone.className = 'molecule';
+    clone.dataset.type = type;
+    clone.textContent = molData.icon;
+    target.appendChild(clone);
+    checkCompound();
+  }
+});
+
+// Touch events สำหรับมือถือ
+moleculesDiv.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const target = touch.target;
+  if (target.classList.contains('molecule')) {
+    target.dataset.dragging = true;
+  }
+});
+target.addEventListener('touchend', e => {
+  const touch = e.changedTouches[0];
+  const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (dropTarget && dropTarget.closest('#target')) {
+    const type = Array.from(moleculesDiv.children).find(m => m.dataset.dragging).dataset.type;
+    const molData = allMolecules.find(m => m.id === type);
+    if (molData) {
+      let clone = document.createElement('div');
+      clone.className = 'molecule';
+      clone.dataset.type = type;
+      clone.textContent = molData.icon;
+      target.appendChild(clone);
+      checkCompound();
+    }
+  }
+  Array.from(moleculesDiv.children).forEach(m => delete m.dataset.dragging);
+});
+
+// เริ่มเกม
+try {
+  populateMolecules();
+  resetTarget();
+  updateUI();
+  startTimer();
+} catch (error) {
+  console.error('Error initializing game:', error);
+  showPopup('❌ เกิดข้อผิดพลาดในการเริ่มเกม กรุณาลองใหม่');
+}
+</script>
+
 </body>
-</html>
+</html> 
