@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เคมีแลนด์: สร้างโมเลกุลมหัศจรรย์</title>
+    <style>
+        /* CSS สำหรับ UI: เรียบง่าย น่าสนใจ สีสันสดใสเหมาะกับเด็ก */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* สีฟ้าอ่อน */
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50; /* สีเขียวสด */
+        }
+        #story {
+            font-size: 18px;
+            margin: 20px;
+            color: #333;
+        }
+        #game-area {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px;
+        }
+        .atom {
+            font-size: 40px;
+            cursor: grab;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            background-color: #fff;
+            transition: transform 0.2s; /* เอฟเฟกต์เคลื่อนไหว */
+        }
+        .atom:hover {
+            transform: scale(1.1); /* ขยายเมื่อ hover */
+        }
+        #target {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #4CAF50;
+            position: relative;
+            margin: 20px auto;
+            background-color: #e8f5e9;
+        }
+        .slot {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 1px dotted #999;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #score {
+            font-size: 24px;
+            color: #FF5722; /* สีส้ม */
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        /* ใช้ emoji สำหรับกราฟฟิก */
+        #character {
+            font-size: 60px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>เคมีแลนด์: สร้างโมเลกุลมหัศจรรย์ 🧑‍🔬⚛️</h1>
+    <div id="character">🧑‍🔬</div>
+    <div id="story">ยินดีต้อนรับนักเคมีน้อย! วันนี้เราต้องสร้างโมเลกุลเพื่อช่วยเพื่อนๆ ลากอะตอมไปวางให้ถูกตำแหน่งนะ!</div>
+    <div id="level">ระดับ 1: สร้าง H2 (ไฮโดรเจน) เพื่อให้พลังงานแก่ยานอวกาศ 🚀<br>เชื่อมโยงกับอาชีพ: นักเคมีพัฒนาเชื้อเพลิงสะอาด</div>
+    <div id="game-area">
+        <div id="atoms">
+            <!-- อะตอมให้ลาก (ใช้ emoji) -->
+        </div>
+    </div>
+    <div id="target">
+        <!-- ช่องวางอะตอม -->
+    </div>
+    <div id="hint"></div>
+    <div id="score">คะแนน: 0 ⭐</div>
+    <button id="reset">ลองใหม่</button>
+    <button id="next-level">ระดับถัดไป</button>
+
+    <script>
+        // JavaScript: กลไกเกม, การลากวาง, ตรวจสอบ, คะแนน
+
+        // ข้อมูลระดับเกม (โครงสร้างเป้าหมาย)
+        const levels = [
+            { 
+                name: 'H2', 
+                structure: ['H', 'H'], // โครงสร้างเป้าหมาย
+                positions: [{left: '50px', top: '75px'}, {left: '200px', top: '75px'}], // ตำแหน่งช่อง
+                story: 'สร้าง H2 (ไฮโดรเจน) เพื่อให้พลังงานแก่ยานอวกาศ 🚀<br>เชื่อมโยงกับอาชีพ: นักเคมีพัฒนาเชื้อเพลิงสะอาด',
+                atoms: ['H', 'H'] // อะตอมให้ลาก
+            },
+            { 
+                name: 'H2O', 
+                structure: ['H', 'O', 'H'],
+                positions: [{left: '50px', top: '75px'}, {left: '125px', top: '75px'}, {left: '200px', top: '75px'}],
+                story: 'สร้าง H2O (น้ำ) เพื่อดับไฟให้มังกร 🔥🦕<br>เชื่อมโยงกับอาชีพ: นักเภสัชกรสร้างยาที่ละลายในน้ำ',
+                atoms: ['H', 'H', 'O', 'C'] // เพิ่มตัวหลอกเพื่อความท้าทาย
+            },
+            { 
+                name: 'CH4', 
+                structure: ['C', 'H', 'H', 'H', 'H'],
+                positions: [{left: '125px', top: '50px'}, {left: '50px', top: '100px'}, {left: '200px', top: '100px'}, {left: '100px', top: '150px'}, {left: '150px', top: '150px'}],
+                story: 'สร้าง CH4 (มีเทน) เพื่อให้พลังงานแก่บ้าน 🌳<br>เชื่อมโยงกับอาชีพ: นักวิทยาศาสตร์สิ่งแวดล้อมศึกษาก๊าซเรือนกระจก',
+                atoms: ['C', 'H', 'H', 'H', 'H', 'O'] // ตัวหลอก
+            }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let placedAtoms = [];
+
+        const storyElem = document.getElementById('story');
+        const levelElem = document.getElementById('level');
+        const atomsElem = document.getElementById('atoms');
+        const targetElem = document.getElementById('target');
+        const hintElem = document.getElementById('hint');
+        const scoreElem = document.getElementById('score');
+        const resetBtn = document.getElementById('reset');
+        const nextBtn = document.getElementById('next-level');
+
+        // ฟังก์ชันเริ่มระดับ
+        function initLevel() {
+            const level = levels[currentLevel];
+            levelElem.innerHTML = `ระดับ ${currentLevel + 1}: ${level.story}`;
+            atomsElem.innerHTML = '';
+            targetElem.innerHTML = '';
+            placedAtoms = [];
+            hintElem.textContent = '';
+
+            // สร้างอะตอมให้ลาก
+            level.atoms.forEach(atom => {
+                const elem = document.createElement('div');
+                elem.className = 'atom';
+                elem.textContent = atom + ' ⚛️';
+                elem.draggable = true;
+                elem.addEventListener('dragstart', dragStart);
+                atomsElem.appendChild(elem);
+            });
+
+            // สร้างช่องวาง
+            level.positions.forEach((pos, index) => {
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.style.left = pos.left;
+                slot.style.top = pos.top;
+                slot.dataset.index = index;
+                slot.addEventListener('dragover', dragOver);
+                slot.addEventListener('drop', drop);
+                targetElem.appendChild(slot);
+            });
+        }
+
+        // ฟังก์ชัน drag and drop
+        function dragStart(e) {
+            e.dataTransfer.setData('text', e.target.textContent.split(' ')[0]); // ส่งชื่ออะตอม
+            e.target.style.opacity = '0.5';
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const atom = e.dataTransfer.getData('text');
+            const index = parseInt(e.target.dataset.index);
+            if (!placedAtoms[index]) {
+                e.target.textContent = atom + ' ⚛️';
+                placedAtoms[index] = atom;
+                checkStructure();
+            }
+        }
+
+        // ตรวจสอบโครงสร้าง
+        function checkStructure() {
+            const level = levels[currentLevel];
+            if (placedAtoms.length === level.structure.length && placedAtoms.every((atom, i) => atom === level.structure[i])) {
+                hintElem.textContent = 'ถูกต้อง! คุณสร้างโมเลกุลได้แล้ว 🎉';
+                score += 10 * level.structure.length;
+                scoreElem.textContent = `คะแนน: ${score} ⭐`;
+                nextBtn.style.display = 'inline';
+            } else if (placedAtoms.filter(a => a).length === level.structure.length) {
+                hintElem.textContent = 'ผิดนะ ลองใหม่! คำใบ้: ' + level.name + ' ประกอบด้วย ' + level.structure.join('-');
+            }
+        }
+
+        // ปุ่มรีเซ็ต
+        resetBtn.addEventListener('click', () => {
+            initLevel();
+        });
+
+        // ปุ่มระดับถัดไป
+        nextBtn.addEventListener('click', () => {
+            currentLevel++;
+            if (currentLevel < levels.length) {
+                initLevel();
+                nextBtn.style.display = 'none';
+            } else {
+                storyElem.textContent = 'จบเกม! คุณคือสุดยอดนักเคมี ⭐⭐⭐ คะแนนรวม: ' + score;
+            }
+        });
+
+        // เริ่มเกม
+        initLevel();
+        nextBtn.style.display = 'none';
+    </script>
+</body>
+</html>
