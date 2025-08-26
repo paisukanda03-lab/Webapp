@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Quest: Rise to Victory</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        #instructions, #game, #end-screen {
+            background: white;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .option {
+            background: #3498db;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .option:hover {
+            background: #2980b9;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #resources {
+            margin-top: 20px;
+            color: #8e44ad;
+        }
+        button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #219653;
+        }
+    </style>
+</head>
+<body>
+    <h1>Organic Quest: Rise to Victory</h1>
+    
+    <div id="instructions">
+        <h2>วิธีเล่น</h2>
+        <p>ยินดีต้อนรับสู่ Organic Quest! คุณจะสวมบทเป็นนักเคมีรุ่นใหม่ที่ต้องเรียนรู้เกี่ยวกับสารอินทรีย์เพื่อผ่าน 5 ด่านและค้นพบ "สารแห่งชัยชนะ"</p>
+        <ul>
+            <li><b>เป้าหมาย</b>: ตอบคำถามเกี่ยวกับสารอินทรีย์ (จับคู่สูตร, คุณสมบัติ, หรือปฏิกิริยา)</li>
+            <li><b>ด่าน</b>: มี 5 ด่าน (อัลเคน, อัลคีน, อัลไคน์, สารอะโรมาติก, การสังเคราะห์)</li>
+            <li><b>คะแนน</b>: ตอบถูกได้ 10 คะแนน, ผิดเสีย 5 คะแนน</li>
+            <li><b>เงื่อนไข</b>: ต้องตอบถูกอย่างน้อย 2 ข้อต่อด่านเพื่อไปด่านต่อไป (ด่าน 5 ต้องตอบถูกทั้ง 3 ข้อ)</li>
+            <li><b>รางวัล</b>: สะสม "พลังงาน" จากแต่ละด่านเพื่อใช้ในด่านสุดท้าย</li>
+        </ul>
+        <button onclick="startGame()">เริ่มเกม</button>
+    </div>
+
+    <div id="game" style="display: none;">
+        <h2 id="level-title"></h2>
+        <p id="question"></p>
+        <div id="options"></div>
+        <p id="feedback"></p>
+        <p>คะแนน: <span id="score">0</span></p>
+        <p id="resources">ทรัพยากร: คาร์บอน: 0, พันธะคู่: 0, พันธะสาม: 0, วงแหวน: 0</p>
+    </div>
+
+    <div id="end-screen" style="display: none;">
+        <h2 id="end-title"></h2>
+        <p id="end-message"></p>
+        <button onclick="location.reload()">เล่นใหม่</button>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                title: "ด่าน 1: พื้นฐานแห่งอัลเคน",
+                resource: "คาร์บอน",
+                questions: [
+                    { question: "สูตร: CH₄", answer: "มีเทน", options: ["มีเทน", "อีเทน", "โพรเพน"] },
+                    { question: "สูตร: C₂H₆", answer: "อีเทน", options: ["มีเทน", "อีเทน", "บิวเทน"] },
+                    { question: "สูตรทั่วไปของอัลเคนคือ?", answer: "CₙH₂ₙ₊₂", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
+                ]
+            },
+            {
+                title: "ด่าน 2: อัลคีนและความท้าทายแห่งพันธะคู่",
+                resource: "พันธะคู่",
+                questions: [
+                    { question: "สูตร: C₂H₄", answer: "เอทิลีน", options: ["เอทิลีน", "อะเซทิลีน", "โพรพิลีน"] },
+                    { question: "ผลผลิตเมื่อ C₃H₆ + H₂ → ?", answer: "C₃H₈", options: ["C₃H₄", "C₃H₆", "C₃H₈"] },
+                    { question: "สูตรทั่วไปของอัลคีนคือ?", answer: "CₙH₂ₙ", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
+                ]
+            },
+            {
+                title: "ด่าน 3: อัลไคน์และพลังแห่งพันธะสาม",
+                resource: "พันธะสาม",
+                questions: [
+                    { question: "สูตร: C₂H₂", answer: "อะเซทิลีน", options: ["เอทิลีน", "อะเซทิลีน", "โพรเพน"] },
+                    { question: "อัลไคน์ใช้ในงานอะไร?", answer: "การเชื่อม", options: ["การเชื่อม", "ทำพลาสติก", "ทำยา"] },
+                    { question: "สูตรทั่วไปของอัลไคน์คือ?", answer: "CₙH₂ₙ₋₂", options: ["CₙH₂ₙ", "CₙH₂ₙ₊₂", "CₙH₂ₙ₋₂"] }
+                ]
+            },
+            {
+                title: "ด่าน 4: สารอะโรมาติกและวงแหวนแห่งพลัง",
+                resource: "วงแหวน",
+                questions: [
+                    { question: "สารใดเป็นสารอะโรมาติก?", answer: "เบนซีน", options: ["มีเทน", "เบนซีน", "เอทิลีน"] },
+                    { question: "สูตรของเบนซีนคือ?", answer: "C₆H₆", options: ["C₆H₆", "C₆H₁₂", "C₆H₁₄"] },
+                    { question: "คุณสมบัติพิเศษของสารอะโรมาติก?", answer: "ความเสถียรจาก delocalized electrons", options: ["มีพันธะเดี่ยว", "ความเสถียรจาก delocalized electrons", "ละลายน้ำได้ดี"] }
+                ]
+            },
+            {
+                title: "ด่าน 5: สังเคราะห์สารแห่งชัยชนะ",
+                resource: "ชัยชนะ",
+                questions: [
+                    { question: "ปฏิกิริยาใดเปลี่ยนเบนซีนเป็นฟีนอล?", answer: "การแทนที่ด้วย -OH", options: ["การเติม H₂", "การแทนที่ด้วย -OH", "การควบแน่น"] },
+                    { question: "สารใดเป็นผลผลิตเมื่อ C₆H₆ + Cl₂ → ?", answer: "C₆H₅Cl", options: ["C₆H₅Cl", "C₆H₄Cl₂", "C₆H₆Cl"] },
+                    { question: "ต้องใช้ทรัพยากรใดในการสร้างฟีนอล?", answer: "วงแหวน + OH", options: ["คาร์บอน + พันธะคู่", "วงแหวน + OH", "พันธะสาม"] }
+                ]
+            }
+        ];
+
+        let currentLevel = 0;
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let resources = { คาร์บอน: 0, พันธะคู่: 0, พันธะสาม: 0, วงแหวน: 0 };
+
+        function startGame() {
+            document.getElementById("instructions").style.display = "none";
+            document.getElementById("game").style.display = "block";
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLevel >= levels.length) {
+                endGame(true);
+                return;
+            }
+            currentQuestion = 0;
+            correctAnswers = 0;
+            document.getElementById("level-title").innerText = levels[currentLevel].title;
+            loadQuestion();
+            updateResources();
+        }
+
+        function loadQuestion() {
+            const level = levels[currentLevel];
+            if (currentQuestion >= level.questions.length) {
+                if (currentLevel === levels.length - 1 && correctAnswers < 3) {
+                    endGame(false);
+                } else if (correctAnswers >= 2) {
+                    resources[level.resource]++;
+                    currentLevel++;
+                    loadLevel();
+                } else {
+                    endGame(false);
+                }
+                return;
+            }
+
+            const q = level.questions[currentQuestion];
+            document.getElementById("question").innerHTML = q.question;
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+            q.options.forEach(option => {
+                const button = document.createElement("div");
+                button.className = "option";
+                button.innerText = option;
+                button.onclick = () => checkAnswer(option);
+                optionsDiv.appendChild(button);
+            });
+            document.getElementById("feedback").innerText = "";
+        }
+
+        function checkAnswer(selected) {
+            const q = levels[currentLevel].questions[currentQuestion];
+            if (selected === q.answer) {
+                score += 10;
+                correctAnswers++;
+                document.getElementById("feedback").innerText = "ถูกต้อง! ได้ 10 คะแนน";
+                document.getElementById("feedback").style.color = "green";
+            } else {
+                score -= 5;
+                document.getElementById("feedback").innerText = `ผิด! คำตอบที่ถูกคือ ${q.answer}`;
+                document.getElementById("feedback").style.color = "red";
+            }
+            document.getElementById("score").innerText = score;
+            currentQuestion++;
+            setTimeout(loadQuestion, 1000);
+        }
+
+        function updateResources() {
+            document.getElementById("resources").innerText = 
+                `ทรัพยากร: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}`;
+        }
+
+        function endGame(won) {
+            document.getElementById("game").style.display = "none";
+            document.getElementById("end-screen").style.display = "block";
+            if (won) {
+                document.getElementById("end-title").innerText = "ยินดีด้วย! คุณชนะ!";
+                document.getElementById("end-message").innerHTML = `
+                    คุณได้ค้นพบ "สารแห่งชัยชนะ" และกลายเป็นนักเคมีแห่งอนาคต!<br>
+                    คะแนน: ${score}<br>
+                    ทรัพยากรที่สะสม: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}
+                `;
+            } else {
+                document.getElementById("end-title").innerText = "ลองใหม่นะ!";
+                document.getElementById("end-message").innerHTML = `
+                    คุณได้คะแนน: ${score}<br>
+                    คุณต้องตอบถูกอย่างน้อย 2 ข้อต่อด่าน (หรือ 3 ข้อในด่านสุดท้าย) เพื่อผ่าน!<br>
+                    ทรัพยากรที่สะสม: คาร์บอน: ${resources.คาร์บอน}, พันธะคู่: ${resources.พันธะคู่}, พันธะสาม: ${resources.พันธะสาม}, วงแหวน: ${resources.วงแหวน}
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
