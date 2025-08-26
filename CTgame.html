@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Bond Master: นักล่าพันธะเคมี</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #00796b;
+    }
+    #game-box {
+      background: #ffffffcc;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .emoji {
+      font-size: 50px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      border: 2px solid #00796b;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #00796b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #004d40;
+    }
+    #feedback {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    #score {
+      font-size: 20px;
+      margin: 15px 0;
+    }
+    #next-btn {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔬 Bond Master: นักล่าพันธะเคมี</h1>
+  <div id="game-box">
+    <div id="question-area">
+      <p id="question"></p>
+      <div class="emoji" id="emoji"></div>
+      <input type="text" id="answer" placeholder="พิมพ์สูตรเคมีที่ถูกต้อง...">
+      <br>
+      <button onclick="checkAnswer()">ตรวจคำตอบ</button>
+      <button id="next-btn" onclick="nextQuestion()">ด่านถัดไป ▶</button>
+      <p id="feedback"></p>
+    </div>
+    <div id="score">⭐ คะแนน: 0</div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // 🔹 ฐานข้อมูลคำถาม
+    // -----------------------------
+    const questions = [
+      {
+        q: "อะตอมของไฮโดรเจน (H) สองตัวรวมกับออกซิเจน (O) หนึ่งตัว จะได้โมเลกุลใด?",
+        emoji: "💧",
+        answer: "H2O"
+      },
+      {
+        q: "โซเดียม (Na) รวมกับคลอรีน (Cl) เกิดสารประกอบที่เราใช้ปรุงอาหารคือ?",
+        emoji: "🧂",
+        answer: "NaCl"
+      },
+      {
+        q: "คาร์บอน (C) หนึ่งตัวรวมกับออกซิเจน (O) สองตัว เป็นแก๊สที่เราหายใจออกมา?",
+        emoji: "🌫️",
+        answer: "CO2"
+      },
+      {
+        q: "ไนโตรเจน 👎 หนึ่งตัวรวมกับไฮโดรเจน (H) สามตัว เป็นก๊าซแอมโมเนีย ใช้ทำปุ๋ย?",
+        emoji: "🌱",
+        answer: "NH3"
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    // -----------------------------
+    // 🔹 แสดงคำถามแรก
+    // -----------------------------
+    function loadQuestion() {
+      document.getElementById("question").innerText = "ด่าน " + (current+1) + ": " + questions[current].q;
+      document.getElementById("emoji").innerText = questions[current].emoji;
+      document.getElementById("answer").value = "";
+      document.getElementById("feedback").innerText = "";
+      document.getElementById("next-btn").style.display = "none";
+    }
+
+    // -----------------------------
+    // 🔹 ตรวจคำตอบ
+    // -----------------------------
+    function checkAnswer() {
+      let ans = document.getElementById("answer").value.trim();
+      if(ans === questions[current].answer) {
+        document.getElementById("feedback").innerText = "✅ ถูกต้อง! เก่งมาก";
+        document.getElementById("feedback").style.color = "green";
+        score += 10;
+        document.getElementById("score").innerText = "⭐ คะแนน: " + score;
+        document.getElementById("next-btn").style.display = "inline-block";
+      } else {
+        document.getElementById("feedback").innerText = "❌ ผิด ลองใหม่อีกครั้งนะ";
+        document.getElementById("feedback").style.color = "red";
+      }
+    }
+
+    // -----------------------------
+    // 🔹 ไปด่านถัดไป
+    // -----------------------------
+    function nextQuestion() {
+      current++;
+      if(current < questions.length) {
+        loadQuestion();
+      } else {
+        document.getElementById("question-area").innerHTML = "<h2>🎉 คุณผ่านทุกด่านแล้ว!</h2><p>คะแนนรวม: " + score + " ⭐</p>";
+      }
+    }
+
+    // -----------------------------
+    // 🔹 เริ่มเกม
+    // -----------------------------
+    loadQuestion();
+  </script>
+
+</body>
+</html>
